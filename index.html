@@ -287,6 +287,67 @@ location.reload();
 
 loadQuestion();
 
+function resetQuiz(reason){
+    alert("Quiz reset: " + reason);
+    location.reload();
+}
+
+/* 1. Detect tab/app switching */
+document.addEventListener("visibilitychange", () => {
+    if (document.hidden){
+        resetQuiz("You left the quiz page");
+    }
+});
+
+/* 2. Detect focus loss */
+window.addEventListener("blur", () => {
+    resetQuiz("Window lost focus");
+});
+
+/* 3. Detect screen resize (split screen / drag window) */
+let startWidth = window.innerWidth;
+let startHeight = window.innerHeight;
+
+window.addEventListener("resize", () => {
+    if(
+        Math.abs(window.innerWidth - startWidth) > 80 ||
+        Math.abs(window.innerHeight - startHeight) > 80
+    ){
+        resetQuiz("Screen layout changed");
+    }
+});
+
+/* 4. Detect rendering slowdown (often happens with overlays) */
+let lastFrame = performance.now();
+
+function detectLag(){
+    let now = performance.now();
+    let diff = now - lastFrame;
+
+    if(diff > 2000){
+        resetQuiz("Another window may be open");
+    }
+
+    lastFrame = now;
+    requestAnimationFrame(detectLag);
+}
+
+requestAnimationFrame(detectLag);
+
+/* 5. Detect if user stops touching screen (possible overlay use) */
+let lastTouch = Date.now();
+
+document.addEventListener("touchstart", () => {
+    lastTouch = Date.now();
+});
+
+setInterval(()=>{
+    if(Date.now() - lastTouch > 15000){
+        resetQuiz("No activity detected");
+    }
+},3000);
+
 </script>
 </body>
+
 </html>
