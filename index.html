@@ -341,13 +341,53 @@ document.addEventListener("touchstart", () => {
     lastTouch = Date.now();
 });
 
-setInterval(()=>{
-    if(Date.now() - lastTouch > 15000){
-        resetQuiz("No activity detected");
+function resetQuiz(reason){
+    alert("Cheating detected: " + reason + ". The quiz will restart.");
+    location.reload();
+}
+
+/* 1. Detect tab/app switching */
+document.addEventListener("visibilitychange", () => {
+    if (document.hidden){
+        resetQuiz("You left the quiz page");
     }
-},3000);
+});
+
+/* 2. Detect losing focus */
+window.addEventListener("blur", () => {
+    resetQuiz("Window lost focus");
+});
+
+/* 3. Detect major screen resize (split screen / floating window) */
+let startWidth = window.innerWidth;
+let startHeight = window.innerHeight;
+
+window.addEventListener("resize", () => {
+    if(
+        Math.abs(window.innerWidth - startWidth) > 80 ||
+        Math.abs(window.innerHeight - startHeight) > 80
+    ){
+        resetQuiz("Screen layout changed (possible multi-window)");
+    }
+});
+
+/* 4. Detect rendering lag (another app overlay sometimes slows animation) */
+let lastFrame = performance.now();
+function detectLag(){
+    let now = performance.now();
+    let diff = now - lastFrame;
+    if(diff > 3000){ // >3 seconds frame drop
+        resetQuiz("Page performance anomaly detected (possible overlay)");
+    }
+    lastFrame = now;
+    requestAnimationFrame(detectLag);
+}
+requestAnimationFrame(detectLag);
+
+/* NOTE: No idle timer, students can take as long as needed */
 
 </script>
 </body>
 
 </html>
+
