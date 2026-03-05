@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>MAPEH Music & Arts Quiz</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+
+body{
+font-family:Arial;
+background:#dbeafe;
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
+margin:0;
+}
+
+.container{
+background:#f9fafb;
+width:90%;
+max-width:600px;
+padding:25px;
+border-radius:10px;
+box-shadow:0 10px 25px rgba(0,0,0,0.2);
+animation:fade .5s;
+}
+
+h1{
+text-align:center;
+color:#1e3a8a;
+}
+
+.question{
+font-size:20px;
+margin-bottom:20px;
+}
+
+button{
+padding:12px;
+margin:5px 0;
+border:none;
+border-radius:6px;
+background:#3b82f6;
+color:white;
+cursor:pointer;
+width:100%;
+font-size:16px;
+}
+
+button:hover{
+background:#1d4ed8;
+}
+
+input{
+padding:10px;
+width:100%;
+margin-bottom:10px;
+border-radius:5px;
+border:1px solid #ccc;
+font-size:16px;
+}
+
+#progress{
+margin-bottom:15px;
+color:#6b7280;
+}
+
+#result{
+text-align:center;
+font-size:22px;
+}
+
+@keyframes fade{
+from{opacity:0; transform:translateY(10px);}
+to{opacity:1; transform:translateY(0);}
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>MAPEH Quiz</h1>
+
+<div id="progress"></div>
+<div id="quiz"></div>
+<div id="result"></div>
+
+</div>
+
+<script>
+
+/* TRUE OR FALSE QUESTION BANK (30) */
+
+let trueFalseBank = [
+
+{q:"The Lantern Festival marks the end of Chinese New Year celebrations.", a:"true"},
+{q:"Dragon Dance symbolizes good luck and prosperity.", a:"true"},
+{q:"Awa Odori is a Chinese festival.", a:"false"},
+{q:"Moriones Festival participants dress as Roman soldiers.", a:"true"},
+{q:"Nyepi is known as the Day of Silence in Bali.", a:"true"},
+{q:"Holi is called the Festival of Colors.", a:"true"},
+{q:"Paso Doble was inspired by Spanish bullfighting.", a:"true"},
+{q:"Tango originated in France.", a:"false"},
+{q:"Swing dance developed alongside jazz music.", a:"true"},
+{q:"Boogie Woogie began as a dance before music.", a:"false"},
+{q:"Material culture includes physical objects used in festivals.", a:"true"},
+{q:"Non-material culture includes traditions and beliefs.", a:"true"},
+{q:"The playwright manages the stage during performances.", a:"false"},
+{q:"Viennese Waltz is faster than the regular Waltz.", a:"true"},
+{q:"Salsa dance was influenced by Caribbean culture.", a:"true"},
+{q:"Lantern riddles are part of the Lantern Festival.", a:"true"},
+{q:"Nebuta Matsuri is famous for large lantern floats.", a:"true"},
+{q:"The mikoshi is a portable shrine.", a:"true"},
+{q:"The bandoneon is used in tango music.", a:"true"},
+{q:"Rumba originated in Brazil.", a:"false"},
+{q:"Swing dance started in African American communities.", a:"true"},
+{q:"Boogie Woogie is known for slow and calm movements.", a:"false"},
+{q:"Happi coats are worn during Japanese festivals.", a:"true"},
+{q:"Dragon Dance performers control the dragon with poles.", a:"true"},
+{q:"The Moriones Festival is celebrated in Marinduque.", a:"true"},
+{q:"Paso Doble movements are soft and slow.", a:"false"},
+{q:"Rumba reflects Afro-Cuban culture.", a:"true"},
+{q:"Salsa originated partly in New York.", a:"true"},
+{q:"Swing dance emphasizes partner communication.", a:"true"},
+{q:"The Lantern Festival includes fireworks and lantern displays.", a:"true"}
+
+];
+
+
+/* IDENTIFICATION QUESTION BANK (30) */
+
+let identificationBank = [
+
+{q:"Festival marking the end of Chinese New Year with lantern displays.", a:"lantern festival"},
+{q:"Traditional Chinese performance using a long dragon figure.", a:"dragon dance"},
+{q:"Philippine festival where participants wear Roman soldier masks.", a:"moriones festival"},
+{q:"Japanese dance festival held in Tokushima.", a:"awa odori"},
+{q:"Balinese holiday known as the Day of Silence.", a:"nyepi"},
+{q:"Indian festival where people throw colored powder.", a:"holi"},
+{q:"Portable shrine carried during Matsuri processions.", a:"mikoshi"},
+{q:"Argentine partner dance known for dramatic movements.", a:"tango"},
+{q:"Accordion-like instrument used in tango music.", a:"bandoneon"},
+{q:"Fast ballroom dance with continuous turning.", a:"viennese waltz"},
+{q:"Spanish dramatic ballroom dance inspired by bullfighting.", a:"paso doble"},
+{q:"Person who writes the script of a play.", a:"playwright"},
+{q:"Person who manages rehearsals and backstage work.", a:"stage manager"},
+{q:"Physical objects used in culture such as lanterns or costumes.", a:"material culture"},
+{q:"Beliefs and traditions shared by a society.", a:"non material culture"},
+{q:"Festival in Japan famous for giant illuminated floats.", a:"nebuta matsuri"},
+{q:"Traditional straw hat worn by female Awa Odori dancers.", a:"amigasa"},
+{q:"Traditional festival coat worn in Japan.", a:"happi"},
+{q:"Afro-Cuban dance that expresses passion and storytelling.", a:"rumba"},
+{q:"Dance style developed from Cuban Son and popularized in New York.", a:"salsa"},
+{q:"Original swing dance that started in Harlem.", a:"lindy hop"},
+{q:"Energetic dance style known for bouncing rhythm and fast footwork.", a:"boogie woogie"},
+{q:"German instrument that gives tango its emotional sound.", a:"bandoneon"},
+{q:"Festival element where riddles are attached to lanterns.", a:"lantern riddles"},
+{q:"Japanese shrine gate marking entrance to sacred space.", a:"torii"},
+{q:"Decorated festival floats used in Japanese celebrations.", a:"dashi"},
+{q:"Cotton robe worn by female dancers in Awa Odori.", a:"yukata"},
+{q:"Dance from Cuba known for playful courtship movements.", a:"rumba"},
+{q:"Dance developed alongside jazz during the Swing Era.", a:"swing dance"},
+{q:"Concept describing the main vision of a theater production.", a:"production concept"}
+
+];
+
+
+/* UTILITY FUNCTIONS */
+
+function shuffle(arr){
+return arr.sort(()=>Math.random()-0.5);
+}
+
+function pickRandom(arr, num){
+let shuffled = shuffle([...arr]);
+return shuffled.slice(0,num);
+}
+
+/* SELECT QUESTIONS */
+
+let trueFalse = pickRandom(trueFalseBank,15);
+let identification = pickRandom(identificationBank,15);
+
+/* COMBINE (TF FIRST) */
+
+let questions = [
+...trueFalse.map(q=>({...q,type:"tf"})),
+...identification.map(q=>({...q,type:"id"}))
+];
+
+let index = 0;
+let score = 0;
+
+/* LOAD QUESTION */
+
+function loadQuestion(){
+
+if(index >= questions.length){
+showResult();
+return;
+}
+
+let q = questions[index];
+
+document.getElementById("progress").innerText =
+"Question " + (index+1) + " / " + questions.length;
+
+let html = "<div class='question'>" + q.q + "</div>";
+
+if(q.type === "tf"){
+
+html += `
+<button onclick="answer('true')">True</button>
+<button onclick="answer('false')">False</button>
+`;
+
+}
+
+if(q.type === "id"){
+
+html += `
+<input id="textAnswer" placeholder="Type your answer">
+<button onclick="submitID()">Submit</button>
+`;
+
+}
+
+document.getElementById("quiz").innerHTML = html;
+
+}
+
+/* ANSWERS */
+
+function answer(choice){
+
+if(choice === questions[index].a){
+score++;
+}
+
+index++;
+loadQuestion();
+
+}
+
+function submitID(){
+
+let input = document.getElementById("textAnswer").value
+.toLowerCase()
+.trim();
+
+if(input === questions[index].a){
+score++;
+}
+
+index++;
+loadQuestion();
+
+}
+
+/* RESULT */
+
+function showResult(){
+
+document.getElementById("quiz").style.display="none";
+
+document.getElementById("result").innerHTML =
+"Score: " + score + " / " + questions.length;
+
+}
+
+/* ANTI CHEAT */
+
+document.addEventListener("visibilitychange", function(){
+
+if(document.hidden){
+alert("You left the quiz. It will restart.");
+location.reload();
+}
+
+});
+
+loadQuestion();
+
+</script>
+</body>
+</html>
